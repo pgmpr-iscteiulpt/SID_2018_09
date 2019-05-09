@@ -83,8 +83,24 @@ public class LoginGUI {
 	okButton.addActionListener(new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
+			try {
+				login();
+			} catch (SQLException | ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
+
+		public void login() throws SQLException, ClassNotFoundException {
+			if ( confirmLog(nameField, passwordField) ) {
+				if ( getAccount() == 'I' ) {
+					login.dispose();
+				} else {
+					
+				}
+			}
+		}
+
 		
 
 		
@@ -106,6 +122,15 @@ public class LoginGUI {
 		return 'I';
 	}
 	
+	public boolean confirmLog(JTextField nameField, JPasswordField passwordField) throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
+		conn = DriverManager.getConnection("jdbc:mysql://localhost/bdorigem_php", "root", "");
+		return true;
+	}
+	
+	public Connection getConn() {
+		return conn;
+	}
 
 	public static void main(String[] args) {
 		new LoginGUI();
