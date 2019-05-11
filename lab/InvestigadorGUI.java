@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 public class InvestigadorGUI {
+
 	private JFrame frame;
 	private DefaultListModel<String> modelU;
 	private JList<String> listU;
@@ -51,26 +52,32 @@ public class InvestigadorGUI {
 		this.log = log;
 		this.utiName = utiName;
 		addFrameContent();
-		addButtonsContent();
+		addFrameContent();
 		frame.setVisible(true);	
 	}
 
+	public void addFrameContent() {
+		idCulturaT = new JTextField();
+		nomeCulturaT = new JTextField();
+		descricaoCulturaT = new JTextField();
+		utilizadorEmailT = new JTextField();
+		modelU = new DefaultListModel<String>();
+		listU = new JList<String>(modelU);
+		scrollU = new JScrollPane(listU);	
+		modelD = new DefaultListModel<String>();
+		listD = new JList<String>(modelD);
+		scrollD = new JScrollPane(listD);
+		frame = new JFrame("Laboratório do Investigador: " + utiName);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setPreferredSize(new Dimension (1100,600));
+		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setLocation(dimension.width/2 - 1250/2, dimension.height/2 - 750/2);
+		frame.setLayout(new BorderLayout());	
+		frame.pack();	
+	}
 
 	
-	private void addButtonsContent() {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	private void addFrameContent() {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
+	
 	public JFrame getFrame() {
 		return frame;
 	}
