@@ -52,7 +52,7 @@ public class InvestigadorGUI {
 		this.log = log;
 		this.utiName = utiName;
 		addFrameContent();
-		addFrameContent();
+		addButtonsContent();
 		frame.setVisible(true);	
 	}
 
@@ -76,6 +76,43 @@ public class InvestigadorGUI {
 		frame.pack();	
 	}
 
+	public void addButtonsContent() {
+		InvestigadorGUI gui = this;
+		
+		center = new JLabel();
+		center.setLayout(new GridLayout(2,1,60,60));
+		center.setBorder(BorderFactory.createEmptyBorder(75, 75, 75, 75));
+		JButton cultureButton = new JButton("Manutenção de culturas");
+		cultureButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					backButton();
+				//new BotaoCultura(gui);
+			}
+
+			private void backButton() {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		JButton measuresButton = new JButton("Manutenção de medições");
+		measuresButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//if (!backButtonPress) {
+					backButton();
+				//}
+				//new BotaoMedicoes();	
+			}
+
+			private void backButton() {
+				// TODO Auto-generated method stub
+				
+			}
+		});	
+		center.add(cultureButton);
+		center.add(measuresButton);
+		frame.add(center, BorderLayout.CENTER);
+	}
+	
 	
 	
 	public JFrame getFrame() {
