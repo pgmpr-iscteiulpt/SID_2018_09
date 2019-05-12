@@ -86,7 +86,7 @@ public class InvestigadorGUI {
 		cultureButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 					backButton();
-//				new BotaoCultura(gui); 
+				//new BotaoCultura(gui);
 			}
 		});
 		JButton measuresButton = new JButton("Manutenção de medições");
@@ -95,7 +95,7 @@ public class InvestigadorGUI {
 				//if (!backButtonPress) {
 					backButton();
 				//}
-//				new BotaoMedicoes();	
+				//new BotaoMedicoes();	
 			}
 		});	
 		center.add(cultureButton);
