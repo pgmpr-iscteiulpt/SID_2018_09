@@ -155,6 +155,207 @@ public class AdministradorGUI {
 		backButtonPress = true;
 	}
 
-	
+	public void itsOkActivated() {
+		if (!okActivate){
+			JButton ok_inserir = new JButton("Ok");
+			ok_inserir.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if(c == 'V') {
+						if (!idVariavelT.getText().isEmpty() && !nomeVariavelT.getText().isEmpty()) {
+							modelD.addElement(idVariavelT.getText() + "      " + nomeVariavelT.getText());
+							modelU.addElement(idVariavelT.getText() + "      " + nomeVariavelT.getText()); 
+							SwingUtilities.updateComponentTreeUI(frame);
+							String query = "INSERT INTO variaveis (IDVariavel, NomeVariavel)"
+									+ "VALUES ("+idVariavelT.getText()+",'"+nomeVariavelT.getText()+"')";
+							try {
+								PreparedStatement preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.execute();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}					
+							idVariavelT.setText("");
+							nomeVariavelT.setText("");	
+						}
+					} else {
+						if (!emailT.getText().isEmpty() && !nomeUtilizadorT.getText().isEmpty() && !categoriaProfissionalT.getText().isEmpty() && !tipoUtilizadorT.getText().isEmpty()) {
+							modelD.addElement(emailT.getText() + "      " + nomeUtilizadorT.getText()+ "      " + categoriaProfissionalT.getText() + "      " + tipoUtilizadorT.getText());
+							modelU.addElement(emailT.getText() + "      " + nomeUtilizadorT.getText()+ "      " + categoriaProfissionalT.getText() + "      " + tipoUtilizadorT.getText()); 
+							SwingUtilities.updateComponentTreeUI(frame);
+							String query = "INSERT INTO utilizador (Email, NomeUtilizador, CategoriaProfissional, TipoUtilizador)"
+									+ "VALUES ('"+emailT.getText()+"','"+nomeUtilizadorT.getText()+"','"+categoriaProfissionalT.getText()+"','"+tipoUtilizadorT.getText()+"')";
+							try {
+								PreparedStatement preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.execute();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
+							emailT.setText("");
+							nomeUtilizadorT.setText("");
+							categoriaProfissionalT.setText("");
+							tipoUtilizadorT.setText("");	
+						}		
+					}
 
+					if ( !listD.isSelectionEmpty() ) {
+						String g [] = listD.getSelectedValue().split("      ");
+						if(c == 'V') {
+							String query = "DELETE FROM variaveis WHERE NomeVariavel = '" + g[1] + "';";
+							PreparedStatement preparedStmt;
+							try {
+								preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.executeUpdate();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
+						} else {
+							String g1 [] = listD.getSelectedValue().split("             ");
+							System.out.println("hey" + g1[1]);
+							String query = "DELETE FROM utilizador WHERE Email = '" + g1[0] + "';";
+							PreparedStatement preparedStmt;
+							try {
+								preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.executeUpdate();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
+						}
+						if (isPress) {
+							modelU.remove(listD.getSelectedIndex());
+							SwingUtilities.updateComponentTreeUI(frame);
+						}
+						modelD.remove(listD.getSelectedIndex());	
+					}
+
+					if(ButtonUpdatePress){
+						if(c == 'V') {
+							String query = "UPDATE variaveis SET IDVariavel = '"+ idVariavelTU.getText() +"', NomeVariavel='"+ nomeVariavelTU.getText() +"' WHERE IDVariavel = '"+gU[0]+"' AND NomeVariavel = '"+gU[1]+"'";
+							PreparedStatement preparedStmt;
+							try {
+								preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.executeUpdate();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
+						} else {
+							System.out.println("hey" + listU.getSelectedValue());
+//							gU = listU.getSelectedValue().split("             ");
+//							System.out.println(gU.length + gU[0]);
+//							gU1 = gU[1].split("           ");
+//							gU2 = gU1[1].split("      ");
+							String query = "UPDATE utilizador SET Email = '"+ emailTU.getText() +"', NomeUtilizador='"+ nomeUtilizadorTU.getText() +"', CategoriaProfissional = '"+ categoriaProfissionalTU.getText() +"', TipoUtilizador = '" + tipoUtilizadorTU.getText() +"' WHERE Email = '"+gU[0]+"' AND NomeUtilizador = '"+gU1[0]+"' AND CategoriaProfissional='"+gU2[0]+"' AND TipoUtilizador='"+gU2[1]+"'";
+							PreparedStatement preparedStmt;
+							try {
+								preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.executeUpdate();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
+						}
+						frame.remove(inserir);
+						updateVariable.doClick();
+						SwingUtilities.updateComponentTreeUI(frame);
+						ButtonUpdatePress = false;
+					}
+
+					if ( !listU.isSelectionEmpty() ) {
+
+
+						System.out.println(listU.getSelectedValue());
+						frame.remove(scrollPU);
+						frame.remove(listU);
+						gU = listU.getSelectedValue().split("      ");
+						inserir = new JPanel();
+						if(c == 'V') {
+							inserir.setLayout(new GridLayout(2,2));				
+							//						inserir.setPreferredSize(new Dimension (300,20));
+							//						inserir.setBorder(BorderFactory.createEmptyBorder(0, 400, 0, 400));
+
+							idVariavel = new JLabel("IDVariavel");
+							nomeVariavel = new JLabel("NomeVariavel");
+						} else {
+
+							gU = listU.getSelectedValue().split("             ");
+							inserir.setLayout(new GridLayout(4,2));				
+
+							email = new JLabel("Email");
+							nomeUtilizador = new JLabel("NomeUtilizador");
+							categoriaProfissional = new JLabel("CategoriaProfissional");
+							tipoUtilizador = new JLabel("TipoUtilizador");
+						}
+						inserir.setPreferredSize(new Dimension (300,20));
+						inserir.setBorder(BorderFactory.createEmptyBorder(0, 400, 0, 400));
+
+						JPanel p1 = new JPanel();
+						JPanel p2 = new JPanel();
+						JPanel p3 = new JPanel();
+						JPanel p4 = new JPanel();
+
+						if(c == 'V') {
+							idVariavelTU = new JTextField(gU[0]);
+							idVariavelTU.setPreferredSize(new Dimension (130,20));
+							p1.add(idVariavelTU);
+							p1.setBorder(BorderFactory.createEmptyBorder(98, 0, 0, 0));
+
+							nomeVariavelTU = new JTextField(gU[1]);
+							nomeVariavelTU.setPreferredSize(new Dimension (130,20));
+							p2.add(nomeVariavelTU);
+							nomeVariavel.setBorder(BorderFactory.createEmptyBorder(0, 0, 200, 0));
+							p2.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+
+							inserir.add(idVariavel);
+							inserir.add(p1);
+							inserir.add(nomeVariavel);
+							inserir.add(p2);
+
+						} else {
+							System.out.println(listU.getSelectedValue());
+							gU = listU.getSelectedValue().split("             ");
+							gU1 = gU[1].split("           ");
+							gU2 = gU1[1].split("      ");
+							
+							emailTU = new JTextField(gU[0]);
+							emailTU.setPreferredSize(new Dimension (130,20));
+							p1.add(emailTU);
+							p1.setBorder(BorderFactory.createEmptyBorder(42, 0, 0, 0));
+
+							nomeUtilizadorTU = new JTextField(gU1[0]);
+							nomeUtilizadorTU.setPreferredSize(new Dimension (130,20));
+							p2.add(nomeUtilizadorTU);
+							p2.setBorder(BorderFactory.createEmptyBorder(42, 0, 0, 0));
+
+							categoriaProfissionalTU = new JTextField(gU2[0]);
+							categoriaProfissionalTU.setPreferredSize(new Dimension (130,20));
+							p3.add(categoriaProfissionalTU);
+							p3.setBorder(BorderFactory.createEmptyBorder(42, 0, 0, 0));
+
+							tipoUtilizadorTU = new JTextField(gU2[1]);
+							tipoUtilizadorTU.setPreferredSize(new Dimension (130,20));
+							p4.add(tipoUtilizadorTU);
+							p4.setBorder(BorderFactory.createEmptyBorder(42, 0, 0, 0));
+
+							inserir.add(email);
+							inserir.add(p1);
+							inserir.add(nomeUtilizador);
+							inserir.add(p2);
+							inserir.add(categoriaProfissional);
+							inserir.add(p3);
+							inserir.add(tipoUtilizador);
+							inserir.add(p4);
+						}
+						frame.add(inserir, BorderLayout.CENTER);
+						SwingUtilities.updateComponentTreeUI(frame);
+						modelU.removeAllElements();
+						ButtonUpdatePress = true;
+						System.out.println(modelU.size());
+						SwingUtilities.updateComponentTreeUI(frame);
+					}
+				}
+			});	
+			JPanel ok = new JPanel();					
+			ok.add(ok_inserir);
+			voltarJ.add(ok, BorderLayout.CENTER);
+			okActivate = true;
+		}	
+	}
+	
 }
