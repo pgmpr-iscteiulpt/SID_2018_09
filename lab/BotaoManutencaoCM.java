@@ -46,7 +46,7 @@ public class BotaoManutencaoCM {
 		insertButton();
 		updateButton();
 		deleteButton();
-
+		
 		north.add(insertCulture);
 		north.add(gui.getUpdateCulture());
 		north.add(deleteCulture);
@@ -54,7 +54,7 @@ public class BotaoManutencaoCM {
 		SwingUtilities.updateComponentTreeUI(gui.getFrame());
 
 	}
-
+	
 	public void insertButton() {
 		if (c == 'C') {
 			insertCulture = new JButton("Inserir cultura");
@@ -161,6 +161,7 @@ public class BotaoManutencaoCM {
 			}
 		});
 	}
+
 	public void updateButton() {
 		gui.getUpdateCulture().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -245,7 +246,7 @@ public class BotaoManutencaoCM {
 			}
 		});
 	}
-	
+
 	public void deleteButton() {
 		if (c == 'C') {
 			deleteCulture = new JButton("Apagar cultura");
@@ -337,5 +338,4 @@ public class BotaoManutencaoCM {
 
 		});
 	}
-
 }

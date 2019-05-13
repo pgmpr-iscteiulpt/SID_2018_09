@@ -117,7 +117,7 @@ public class InvestigadorGUI {
 				c = 'C';
 				updateCulture = new JButton("Alterar cultura");
 				backButton();
-			//	new BotaoManutencaoCM(gui, c);
+				new BotaoManutencaoCM(gui, c);
 			}
 		});
 		JButton measuresButton = new JButton("Manutenção de medições");
@@ -129,7 +129,7 @@ public class InvestigadorGUI {
 				backButton();
 				//}
 				//new BotaoMedicoes();
-				//new BotaoManutencaoCM(gui, c);
+				new BotaoManutencaoCM(gui, c);
 			}
 		});	
 		center.add(cultureButton);

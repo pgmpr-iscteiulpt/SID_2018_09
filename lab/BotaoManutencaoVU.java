@@ -45,8 +45,8 @@ public class BotaoManutencaoVU {
 
 		insertButton();
 		updateButton();
-		//deleteButton();
-
+		deleteButton();
+		
 		north.add(insertVariable);
 		north.add(gui.getUpdateVariable());
 		north.add(deleteVariable);
@@ -208,4 +208,75 @@ public class BotaoManutencaoVU {
 		});
 	}
 
+	public void deleteButton() {
+		if (c == 'V') {
+			deleteVariable = new JButton("Apagar variável");
+		} else {
+			deleteVariable = new JButton("Apagar utilizador");
+		}
+		deleteVariable.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				gui.getModelD().removeAllElements();
+				//listD = new JList<String>(modelD);
+				//scrollD = new JScrollPane(listD);
+				String topic = null;
+				if (c == 'V') {
+					topic = "ID       Nome";
+				} else {
+					topic = "Email       Nome     Categoria     Tipo";
+				}
+				gui.getScrollD().setViewportBorder(new TitledBorder(topic));						
+				gui.getScrollD().setPreferredSize(new Dimension(300, 400));
+				gui.getScrollD().setViewportView(gui.getListD());
+				JPanel scrollP = new JPanel();	
+				scrollP.add(gui.getScrollD());
+				scrollP.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+
+
+				gui.getFrame().add(scrollP, BorderLayout.EAST);
+
+
+				gui.itsOkActivated();
+
+				if (c == 'V') {
+					String query = "SELECT * FROM variaveis";
+					PreparedStatement preparedStmt = null;
+					try { 
+						preparedStmt = gui.getLog().getConn().prepareStatement(query);
+						ResultSet rs = preparedStmt.executeQuery(query);
+						while(rs.next()) {
+							int id = rs.getInt(1);
+							String name = rs.getString(2);
+							gui.getModelD().addElement(id + "      " + name);
+						}
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}	
+				} else {
+	
+					String query = "SELECT * FROM utilizador";
+					PreparedStatement preparedStmt = null;
+					try { 
+						preparedStmt = gui.getLog().getConn().prepareStatement(query);
+						ResultSet rs = preparedStmt.executeQuery(query);
+						while(rs.next()) {
+							String email = rs.getString(1);
+							String nome = rs.getString(2);
+							String cp = rs.getString(3);
+							String tipo = rs.getString(4);
+								gui.getModelD().addElement(email + "             " + nome + "           " + cp + "      " + tipo);
+							}
+						} catch (SQLException e1) {
+							e1.printStackTrace();
+						}
+					
+				}
+				SwingUtilities.updateComponentTreeUI(gui.getFrame());
+
+			}
+
+
+		});
+	}
 }

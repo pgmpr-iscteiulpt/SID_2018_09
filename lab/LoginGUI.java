@@ -42,7 +42,7 @@ public class LoginGUI {
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		buttonPanel.add(okButton);
 		buttonPanel.add(cancelButton);
-		
+
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(4, 4, 4, 4);
 		gbc.gridx = 0;
@@ -101,7 +101,7 @@ public class LoginGUI {
 				System.out.println(nameField.getText());
 				login.dispose();
 			} else if ( getAccount() == 'A') {
-				//new AdministradorGUI(log, nameField.getText());
+				new AdministradorGUI(log, nameField.getText());
 				login.dispose();
 			} else if( getAccount() == 'N') {
 				JOptionPane.showMessageDialog(login, "Utilizador não existente");
