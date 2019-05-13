@@ -60,11 +60,6 @@ public class BotaoManutencaoCM {
 		
 	}
 
-	private void updateButton() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	public void insertButton() {
 		if (c == 'C') {
 			insertCulture = new JButton("Inserir cultura");
@@ -171,6 +166,89 @@ public class BotaoManutencaoCM {
 			}
 		});
 	}
+	public void updateButton() {
+		gui.getUpdateCulture().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 
+				String topic = null;
+				gui.setPress(true);
+
+				gui.getModelU().removeAllElements();
+				//listU = new JList<String>(modelU);
+				//scrollU = new JScrollPane(listU);
+				if (c == 'C') {
+					topic = "ID       Nome       Descrição       Utilizador";
+				} else {
+					topic = "Cul      Var        ID        Data                                    Valor";
+				}
+				gui.getScrollU().setViewportBorder(new TitledBorder(topic));						
+				gui.getScrollU().setPreferredSize(new Dimension(300, 400));
+				gui.getScrollU().setViewportView(gui.getListU());
+				//scrollPU = new JPanel();	
+				gui.getScrollPU().add(gui.getScrollU());
+				//scrollP.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+
+				gui.getFrame().add(gui.getScrollPU(), BorderLayout.CENTER);
+
+				gui.itsOkActivated();
+
+				if (c == 'C') {
+					String query = "SELECT * FROM cultura WHERE UtilizadorEmail = '"+ gui.getUtiName() + "'";
+					PreparedStatement preparedStmt = null;
+					try { 
+						preparedStmt = gui.getLog().getConn().prepareStatement(query);
+						ResultSet rs = preparedStmt.executeQuery(query);
+						while(rs.next()) {
+							int id = rs.getInt(1);
+							String name = rs.getString(2);
+							String description = rs.getString(3);
+							String email = rs.getString(4);
+							gui.getModelU().addElement(id + "      " + name + "      " + description + "      " + email);
+						}
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}
+				} else {
+					String query1 = "SELECT IDCultura FROM cultura WHERE UtilizadorEmail = '"+ gui.getUtiName() + "'";
+					PreparedStatement preparedStmt = null;
+					ArrayList<Integer> ids = new ArrayList<Integer>();
+					try { 
+						preparedStmt = gui.getLog().getConn().prepareStatement(query1);
+						ResultSet rs = preparedStmt.executeQuery(query1);
+						while(rs.next()) {
+							ids.add(rs.getInt(1));
+						}
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}
+
+
+
+					for (Integer i : ids) {
+
+
+						String query = "SELECT * FROM medicoes WHERE IDCultura = '"+ i + "'";
+						//PreparedStatement preparedStmt = null;
+						try { 
+							preparedStmt = gui.getLog().getConn().prepareStatement(query);
+							ResultSet rs = preparedStmt.executeQuery(query);
+							while(rs.next()) {
+								int idC = rs.getInt(1);
+								int idV = rs.getInt(2);
+								int id = rs.getInt(3);
+								Timestamp data = rs.getTimestamp(4);
+								double valor = rs.getDouble(5);
+								gui.getModelU().addElement(idC + "             " + idV + "           " + id + "      " + data + "        " + valor);
+							}
+						} catch (SQLException e1) {
+							e1.printStackTrace();
+						}
+					}
+				}
+				SwingUtilities.updateComponentTreeUI(gui.getFrame());
+
+			}
+		});
+	}
 
 }
