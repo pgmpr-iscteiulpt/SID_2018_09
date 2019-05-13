@@ -1,0 +1,4 @@
+//A aplicação do refactoring modificaria a interface LoguinGUI impossibilitando a efetuação da autenticação do utilizador
+LoginGUI	private void addLoginDialogContent() 	gbc	B1	0/16
+//A aplicação do refactoring levaria a uma repetição de códifo excessiva e injustificável para o funcionamento do método em questão
+LoginGUI	public char getAccount() 	preparedStmt	B1	2/4

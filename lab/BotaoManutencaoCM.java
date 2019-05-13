@@ -43,16 +43,19 @@ public class BotaoManutencaoCM {
 		north.setLayout(new GridLayout(1,3,60,60));
 		north.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		insertButton();
-		updateButton();
-		deleteButton();
-		
+		insertButtons();
 		north.add(insertCulture);
 		north.add(gui.getUpdateCulture());
 		north.add(deleteCulture);
 		gui.getFrame().add(north, BorderLayout.NORTH);
 		SwingUtilities.updateComponentTreeUI(gui.getFrame());
 
+	}
+
+	public void insertButtons() {
+		insertButton();
+		updateButton();
+		deleteButton();
 	}
 	
 	public void insertButton() {

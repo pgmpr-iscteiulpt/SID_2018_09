@@ -1,0 +1,4 @@
+//A crição de ambas as classes teve o propósito de evitar a criação de uma GodClass com execissas linhas de código
+Refactoring Type	Source Entity	Target Class	Source/Target accessed members	Rate it!
+Move Method	BotaoManutencaoCM::updateButton():void	InvestigadorGUI	2/10	
+Move Method	BotaoManutencaoVU::updateButton():void	AdministradorGUI	2/9	
