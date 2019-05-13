@@ -1,0 +1,849 @@
+-- phpMyAdmin SQL Dump
+-- version 4.8.3
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: 13-Maio-2019 às 17:47
+-- Versão do servidor: 10.1.37-MariaDB
+-- versão do PHP: 7.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `bdorigem_php`
+--
+CREATE DATABASE IF NOT EXISTS `bdorigem_php` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `bdorigem_php`;
+
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `Consultar_Alertas_Intervalo` (IN `DataInicio` DATE, IN `HoraInicio` TIME, IN `DataFim` DATE, IN `HoraFim` TIME)  NO SQL
+BEGIN 
+
+set @username =  SUBSTRING_INDEX(CURRENT_USER(), '@', 1);
+SELECT Email INTO @email FROM utilizador WHERE username=@username;
+
+SELECT IDCultura INTO @cultura FROM cultura WHERE UtilizadorEmail=@email;
+
+
+SELECT * FROM alertas WHERE (IDCultura = @cultura AND Data > DataInicio AND Data<DataFim) OR (IDCultura = @cultura AND Data = DataInicio AND Hora >= HoraInicio) OR (IDCultura = @cultura AND Data = DataFim AND Hora <= HoraFim) OR (IDCultura IS Null);
+
+UPDATE alertas SET Novo=1 WHERE ((IDCultura = @cultura AND Data > DataInicio AND Data<DataFim) OR (IDCultura = @cultura AND Data = DataInicio AND Hora >= HoraInicio) OR (IDCultura = @cultura AND Data = DataFim AND Hora <= HoraFim) OR (IDCultura IS Null)) AND Novo=0;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `Consultar_Alertas_Novos` ()  NO SQL
+BEGIN
+
+set @username =  SUBSTRING_INDEX(CURRENT_USER(), '@', 1);
+SELECT Email INTO @email FROM utilizador WHERE username=@username;
+
+SELECT IDCultura INTO @cultura FROM cultura WHERE UtilizadorEmail=@email;
+
+SELECT * FROM alertas WHERE (IDCultura = @cultura OR IDCultura is NULL) AND Novo=0;
+
+UPDATE alertas SET Novo=1 WHERE (IDCultura = @cultura OR IDCultura is NULL) AND Novo=0;
+
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `Consultar_Luminosidade` (IN `DataInicio` TIMESTAMP, IN `DataFim` TIMESTAMP)  NO SQL
+BEGIN
+
+SELECT * FROM medicoesluminosidade
+    WHERE (DataHoraMedicao >= DataInicio) AND (DataHoraMedicao <= DataFim);
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `Consultar_Medicoes` (IN `IDCultura` INT, IN `Data_de_inicio` TIMESTAMP, IN `Data_de_fim` TIMESTAMP)  BEGIN
+
+     insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'R', CURRENT_TIMESTAMP, "Medicoes", "NULL", "NULL");
+	
+    SELECT * FROM medicoes 
+    WHERE medicoes.IDCultura = IDCultura AND (medicoes.DataHoraMedicao >= Data_de_inicio AND medicoes.DataHoraMedicao <= Data_de_fim);
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `Consultar_Temperatura` (IN `DataInicio` TIMESTAMP, IN `DataFim` TIMESTAMP)  NO SQL
+BEGIN
+
+SELECT * FROM medicoestemperatura 
+    WHERE (DataHoraMedicao >= DataInicio) AND (DataHoraMedicao <= DataFim);
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `Criar_Utilizador` (IN `username` VARCHAR(50), IN `pass` VARCHAR(50), IN `UserEmail` VARCHAR(50), IN `UserNome` VARCHAR(50), IN `UserCategoria` VARCHAR(50), IN `UserTipo` VARCHAR(50))  BEGIN
+
+set @username= username;
+set @password= pass;
+set @email= UserEmail;
+set @nome= UserNome;
+set @categoria= UserCategoria;
+set @tipo = UserTipo;
+
+#Cria utilizador
+SET @query1 = CONCAT('CREATE USER "',@username,'"@"localhost" IDENTIFIED BY "',@password,'" ');
+PREPARE stmt FROM @query1; 
+EXECUTE stmt; 
+DEALLOCATE PREPARE stmt;
+
+#Atribui os privilégios respetivos
+IF (UserTipo = 'Investigador') THEN 
+	SET @query2 = CONCAT('GRANT GrupoInvestigadores TO "',@username,'"@"localhost"');
+ELSE 
+	SET @query2 = CONCAT('GRANT GrupoAdministradores TO "',@username,'"@"localhost"');
+END IF;
+
+PREPARE stmt FROM @query2; 
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+FLUSH PRIVILEGES;
+
+#Insere utilizador na tabela
+insert into utilizador (email, nomeutilizador, username, categoriaprofissional, tipoutilizador)
+	VALUES
+		(UserEmail, UserNome, username, UserCategoria, UserTipo);
+
+END$$
+
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `alertas`
+--
+
+CREATE TABLE `alertas` (
+  `IDAlerta` int(11) NOT NULL,
+  `IDCultura` int(11) DEFAULT NULL,
+  `NomeVariavel` varchar(50) NOT NULL,
+  `Data` date NOT NULL,
+  `Hora` time NOT NULL,
+  `LimiteInferior` int(10) NOT NULL,
+  `LimiteSuperior` int(10) NOT NULL,
+  `ValorMedicao` decimal(8,2) NOT NULL,
+  `Descricao` varchar(200) NOT NULL,
+  `Novo` int(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `cultura`
+--
+
+CREATE TABLE `cultura` (
+  `IDCultura` int(11) NOT NULL,
+  `NomeCultura` varchar(100) NOT NULL,
+  `DescricaoCultura` text NOT NULL,
+  `UtilizadorEmail` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Acionadores `cultura`
+--
+DELIMITER $$
+CREATE TRIGGER `TriggerCultura_Delete` AFTER DELETE ON `cultura` FOR EACH ROW BEGIN
+
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Cultura", "Utilizador_Email", OLD.UtilizadorEmail),
+		(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Cultura", "IDCultura", OLD.IDCultura),	
+    	(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Cultura", "NomeCultura", OLD.NomeCultura),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Cultura", "DescricaoCultura", OLD.DescricaoCultura);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerCultura_Insert` AFTER INSERT ON `cultura` FOR EACH ROW BEGIN
+
+    insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Cultura", "Utilizador_Email", NEW.UtilizadorEmail),
+		(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Cultura", "IDCultura", NEW.IDCultura),	
+    	(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Cultura", "NomeCultura", NEW.NomeCultura),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Cultura", "DescricaoCultura", NEW.DescricaoCultura);
+
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerCultura_Update` AFTER UPDATE ON `cultura` FOR EACH ROW BEGIN
+
+IF NEW.UtilizadorEmail <> OLD.UtilizadorEmail THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Cultura", "Utilizador_Email", NEW.UtilizadorEmail);       
+END IF; 
+
+IF OLD.IDCultura <> NEW.IDCultura THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Cultura", "IDCultura", NEW.IDCultura);
+END IF; 
+        
+IF OLD.NomeCultura <> NEW.NomeCultura THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Cultura", "NomeCultura", NEW.NomeCultura);
+END IF; 
+        
+IF OLD.DescricaoCultura <> NEW.DescricaoCultura THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Cultura", "DescricaoCultura", NEW.DescricaoCultura);
+END IF; 
+
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `logs`
+--
+
+CREATE TABLE `logs` (
+  `LogID` int(11) NOT NULL,
+  `User` varchar(50) NOT NULL,
+  `Operacao` enum('I','U','D','R') NOT NULL,
+  `DataHora` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `Tabela` varchar(50) NOT NULL,
+  `Campo` varchar(50) NOT NULL,
+  `Atualizacao` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `medicoes`
+--
+
+CREATE TABLE `medicoes` (
+  `IDVariavel` int(11) NOT NULL,
+  `IDCultura` int(11) NOT NULL,
+  `NumeroMedicao` int(11) NOT NULL,
+  `DataHoraMedicao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ValorMedicao` decimal(8,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Acionadores `medicoes`
+--
+DELIMITER $$
+CREATE TRIGGER `TriggerMedições_Delete` AFTER DELETE ON `medicoes` FOR EACH ROW BEGIN
+
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Medicoes", "IDCultura", OLD.IDCultura),
+		(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Medicoes", "IDVariavel", OLD.IDVariavel),	
+    	(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Medicoes", "NumeroMedicao", OLD.NumeroMedicao),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Medicoes", "DataHoraMedicao", OLD.DataHoraMedicao),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Medicoes", "ValorMedicao", OLD.ValorMedicao);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerMedições_Insert` AFTER INSERT ON `medicoes` FOR EACH ROW BEGIN
+
+    insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Medicoes", "IDCultura", NEW.IDCultura),
+		(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Medicoes", "IDVariavel", NEW.IDVariavel),	
+    	(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Medicoes", "NumeroMedicao", NEW.NumeroMedicao),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Medicoes", "DataHoraMedicao", NEW.DataHoraMedicao),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Medicoes", "ValorMedicao", NEW.ValorMedicao);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerMedições_Update` AFTER UPDATE ON `medicoes` FOR EACH ROW BEGIN
+
+IF NEW.IDCultura <> OLD.IDCultura THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Medicoes", "IDCultura", NEW.IDCultura);       
+END IF; 
+
+IF OLD.IDVariavel <> NEW.IDVariavel THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Medicoes", "IDVariavel", NEW.IDVariavel);
+END IF; 
+        
+IF OLD.NumeroMedicao <> NEW.NumeroMedicao THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Medicoes", "NumeroMedicao", NEW.NumeroMedicao);
+END IF; 
+        
+IF OLD.DataHoraMedicao <> NEW.DataHoraMedicao THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Medicoes", "DataHoraMedicao", NEW.DataHoraMedicao);
+END IF;
+
+IF OLD.ValorMedicao <> NEW.ValorMedicao THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Medicoes", "ValorMedicao", NEW.ValorMedicao);
+END IF; 
+
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `medicoesluminosidade`
+--
+
+CREATE TABLE `medicoesluminosidade` (
+  `IDMedicao` int(11) NOT NULL,
+  `DataHoraMedicao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ValorMedicaoLuminosidade` decimal(8,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Acionadores `medicoesluminosidade`
+--
+DELIMITER $$
+CREATE TRIGGER `TriggerMediçõesLuminosidade_Delete` AFTER DELETE ON `medicoesluminosidade` FOR EACH ROW BEGIN
+
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "MedicoesLuminosidade", "DataHoraMedicao", OLD.DataHoraMedicao),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "MedicoesLuminosidade", "ValorMedicaoLuminosidade", OLD.ValorMedicaoLuminosidade),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "MedicoesLuminosidade", "IDMedicao", OLD.IDMedicao);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerMediçõesLuminosidade_Insert` AFTER INSERT ON `medicoesluminosidade` FOR EACH ROW BEGIN
+
+    insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "MedicoesLuminosidade", "DataHoraMedicao", NEW.DataHoraMedicao),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "MedicoesLuminosidade", "ValorMedicaoLuminosidade", NEW.ValorMedicaoLuminosidade),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "MedicoesLuminosidade", "IDMedicao", NEW.IDMedicao);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerMediçõesLuminosidade_Update` AFTER UPDATE ON `medicoesluminosidade` FOR EACH ROW BEGIN
+        
+IF OLD.DataHoraMedicao <> NEW.DataHoraMedicao THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "MedicoesLuminosidade", "DataHoraMedicao", NEW.DataHoraMedicao);
+END IF;
+
+IF OLD.ValorMedicaoLuminosidade <> NEW.ValorMedicaoLuminosidade THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Medicoesluminosidade", "ValorMedicaoLuminosidade", NEW.ValorMedicaoLuminosidade);
+END IF; 
+
+IF OLD.IDMedicao <> NEW.IDMedicao THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Medicoesluminosidade", "IDMedicao", NEW.IDMedicao);
+END IF; 
+
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `medicoestemperatura`
+--
+
+CREATE TABLE `medicoestemperatura` (
+  `IDMedicao` int(11) NOT NULL,
+  `DataHoraMedicao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ValorMedicaoTemperatura` decimal(8,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Acionadores `medicoestemperatura`
+--
+DELIMITER $$
+CREATE TRIGGER `TriggerMediçõesTemperatura_Delete` AFTER DELETE ON `medicoestemperatura` FOR EACH ROW BEGIN
+
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "MedicoesTemperatura", "DataHoraMedicao", OLD.DataHoraMedicao),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "MedicoesTemperatura", "ValorMedicaoTemperatura", OLD.ValorMedicaoTemperatura),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "MedicoesTemperatura", "IDMedicao", OLD.IDMedicao);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerMediçõesTemperatura_Insert` AFTER INSERT ON `medicoestemperatura` FOR EACH ROW BEGIN
+
+    insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "MedicoesTemperatura", "DataHoraMedicao", NEW.DataHoraMedicao),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "MedicoesTemperatura", "ValorMedicaoTemperatura", NEW.ValorMedicaoTemperatura),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "MedicoesTemperatura", "IDMedicao", NEW.IDMedicao);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerMediçõesTemperatura_Update` AFTER UPDATE ON `medicoestemperatura` FOR EACH ROW BEGIN
+        
+IF OLD.DataHoraMedicao <> NEW.DataHoraMedicao THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "MedicoesTemperatura", "DataHoraMedicao", NEW.DataHoraMedicao);
+END IF;
+
+IF OLD.ValorMedicaoTemperatura <> NEW.ValorMedicaoTemperatura THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "MedicoesTemperatura", "ValorMedicaoTemperatura", NEW.ValorMedicaoTemperatura);
+END IF; 
+
+IF OLD.IDMedicao <> NEW.IDMedicao THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "MedicoesTemperatura", "IDMedicao", NEW.IDMedicao);
+END IF; 
+
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `sistema`
+--
+
+CREATE TABLE `sistema` (
+  `Sistema_ID` int(11) NOT NULL,
+  `LimiteInferiorTemperatura` decimal(8,2) NOT NULL,
+  `LimiteSuperiorTemperatura` decimal(8,2) NOT NULL,
+  `LimiteSuperiorLuz` decimal(8,2) NOT NULL,
+  `LimiteInferiorLuz` decimal(8,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Acionadores `sistema`
+--
+DELIMITER $$
+CREATE TRIGGER `TriggerSistema_Delete` AFTER DELETE ON `sistema` FOR EACH ROW BEGIN
+
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Sistema", "Sistema_ID", OLD.Sistema_ID),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Sistema", "LimiteInferiorTemperatura", OLD.LimiteInferiorTemperatura),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Sistema", "LimiteSuperiorTemperatura", OLD.LimiteSuperiorTemperatura),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Sistema", "LimiteSuperiorLuz", OLD.LimiteSuperiorLuz),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Sistema", "LimiteInferiorLuz", OLD.LimiteInferiorLuz);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerSistema_Insert` AFTER INSERT ON `sistema` FOR EACH ROW BEGIN
+
+    insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Sistema", "Sistema_ID", NEW.Sistema_ID),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Sistema", "LimiteInferiorTemperatura", NEW.LimiteInferiorTemperatura),
+         (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Sistema", "LimiteSuperiorTemperatura", NEW.LimiteSuperiorTemperatura),
+          (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Sistema", "LimiteInferiorLuz", NEW.LimiteInferiorLuz),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Sistema", "LimiteSuperiorLuz", NEW.LimiteSuperiorLuz);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerSistema_Update` AFTER UPDATE ON `sistema` FOR EACH ROW BEGIN
+        
+IF OLD.Sistema_ID <> NEW.Sistema_ID THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Sistema", "Sistema_ID", NEW.Sistema_ID);
+END IF;
+
+IF OLD.LimiteInferiorTemperatura <> NEW.LimiteInferiorTemperatura THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Sistema", "LimiteInferiorTemperatura", NEW.LimiteInferiorTemperatura);
+END IF; 
+
+IF OLD.LimiteSuperiorTemperatura <> NEW.LimiteSuperiorTemperatura THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Sistema", "LimiteSuperiorTemperatura", NEW.LimiteSuperiorTemperatura);
+END IF; 
+
+IF OLD.LimiteSuperiorLuz <> NEW.LimiteSuperiorLuz THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Sistema", "LimiteSuperiorLuz", NEW.LimiteSuperiorLuz);
+END IF; 
+
+IF OLD.LimiteInferiorLuz <> NEW.LimiteInferiorLuz THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Sistema", "LimiteInferiorLuz", NEW.LimiteInferiorLuz);
+END IF; 
+
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `utilizador`
+--
+
+CREATE TABLE `utilizador` (
+  `Email` varchar(50) NOT NULL,
+  `NomeUtilizador` varchar(100) NOT NULL,
+  `Username` varchar(100) NOT NULL,
+  `CategoriaProfissional` varchar(300) NOT NULL,
+  `TipoUtilizador` enum('Investigador','Administrador') NOT NULL DEFAULT 'Investigador'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Acionadores `utilizador`
+--
+DELIMITER $$
+CREATE TRIGGER `TriggerUtilizador_Delete` AFTER DELETE ON `utilizador` FOR EACH ROW BEGIN
+
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Utilizador", "Email", OLD.Email),
+		(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Utilizador", "NomeInvestigador", OLD.NomeUtilizador),	
+    	(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Utilizador", "CategoriaProfissional", OLD.CategoriaProfissional),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Utilizador", "TipoUtilizador", OLD.TipoUtilizador);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerUtilizador_Insert` AFTER INSERT ON `utilizador` FOR EACH ROW BEGIN
+
+     insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Utilizador", "Email", NEW.Email),
+		(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Utilizador", "NomeUtilizador", NEW.NomeUtilizador),	
+    	(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Utilizador", "CategoriaProfissional", NEW.CategoriaProfissional),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Utilizador", "TipoUtilizador", NEW.TipoUtilizador);
+
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerUtilizador_Update` AFTER UPDATE ON `utilizador` FOR EACH ROW BEGIN
+
+IF NEW.Email <> OLD.Email THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Utilizador", "Email", NEW.Email);       
+END IF; 
+
+IF OLD.NomeUtilizador <> NEW.NomeUtilizador THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Utilizador", "NomeUtilizador", NEW.NomeUtilizador);
+END IF; 
+        
+IF OLD.CategoriaProfissional <> NEW.CategoriaProfissional THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Utilizador", "CategoriaProfissional", NEW.CategoriaProfissional);
+END IF; 
+        
+IF OLD.TipoUtilizador <> NEW.TipoUtilizador THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Utilizador", "TipoUtilizador", NEW.TipoUtilizador);
+END IF; 
+
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `variaveis`
+--
+
+CREATE TABLE `variaveis` (
+  `IDVariavel` int(11) NOT NULL,
+  `NomeVariavel` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Acionadores `variaveis`
+--
+DELIMITER $$
+CREATE TRIGGER `TriggerVariáveis_Delete` AFTER DELETE ON `variaveis` FOR EACH ROW BEGIN
+
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Variaveis", "IDVariavel", OLD.IDVariavel),	
+    	(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "Variaveis", "NomeVariavel", OLD.NomeVariavel);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerVariáveis_Insert` AFTER INSERT ON `variaveis` FOR EACH ROW BEGIN
+
+    insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Variaveis", "IDVariavel", NEW.IDVariavel),	
+    	(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "Variaveis", "NomeVariavel", NEW.NomeVariavel);
+
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerVariáveis_Update` AFTER UPDATE ON `variaveis` FOR EACH ROW BEGIN
+
+IF OLD.IDVariavel <> NEW.IDVariavel THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Variaveis", "IDVariavel", NEW.IDVariavel);
+END IF; 
+        
+IF OLD.NomeVariavel <> NEW.NomeVariavel THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "Variaveis", "NomeVariavel", NEW.NomeVariavel);
+END IF; 
+
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `variaveismedidas`
+--
+
+CREATE TABLE `variaveismedidas` (
+  `IDCultura` int(11) NOT NULL,
+  `IDVariavel` int(11) NOT NULL,
+  `LimiteInferior` decimal(8,2) DEFAULT NULL,
+  `LimiteSuperior` decimal(8,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Acionadores `variaveismedidas`
+--
+DELIMITER $$
+CREATE TRIGGER `TriggerVariaveisMedidas_Delete` AFTER DELETE ON `variaveismedidas` FOR EACH ROW BEGIN
+
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "VariaveisMedidas", "IDCultura", OLD.IDCultura),
+		(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "VariaveisMedidas", "IDVariavel", OLD.IDVariavel),	
+    	(CURRENT_USER, 'D', CURRENT_TIMESTAMP, "VariaveisMedidas", "LimiteInferior", OLD.LimiteInferior),
+        (CURRENT_USER, 'D', CURRENT_TIMESTAMP, "VariaveisMedidas", "LimiteSuperior", OLD.LimiteSuperior);
+        
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerVariaveisMedidas_Insert` AFTER INSERT ON `variaveismedidas` FOR EACH ROW BEGIN
+
+    insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "VariaveisMedidas", "IDCultura", NEW.IDCultura),
+		(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "VariaveisMedidas", "IDVariavel", NEW.IDVariavel),	
+    	(CURRENT_USER, 'I', CURRENT_TIMESTAMP, "VariaveisMedidas", "LimiteInferior", NEW.LimiteInferior),
+        (CURRENT_USER, 'I', CURRENT_TIMESTAMP, "VariaveisMedidas", "LimiteSuperior", NEW.LimiteSuperior);
+
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TriggerVariaveisMedidas_Update` AFTER UPDATE ON `variaveismedidas` FOR EACH ROW BEGIN
+
+IF NEW.IDCultura <> OLD.IDCultura THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+		(CURRENT_USER, 'U', CURRENT_TIMESTAMP, "VariaveisMedidas", "IDCultura", NEW.IDCultura);       
+END IF; 
+
+IF OLD.IDVariavel <> NEW.IDVariavel THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "VariaveisMedidas", "IDVariavel", NEW.IDVariavel);
+END IF; 
+        
+IF OLD.LimiteInferior <> NEW.LimiteInferior THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+        (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "VariaveisMedidas", "LimiteInferior", NEW.LimiteInferior);
+END IF; 
+        
+IF OLD.LimiteSuperior <> NEW.LimiteSuperior THEN
+insert into logs (user, operacao, datahora, tabela, campo, atualizacao)
+	VALUES
+    (CURRENT_USER, 'U', CURRENT_TIMESTAMP, "VariaveisMedidas", "LimiteSuperior", NEW.LimiteSuperior);
+END IF; 
+
+END
+$$
+DELIMITER ;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `alertas`
+--
+ALTER TABLE `alertas`
+  ADD PRIMARY KEY (`IDAlerta`);
+
+--
+-- Indexes for table `cultura`
+--
+ALTER TABLE `cultura`
+  ADD PRIMARY KEY (`IDCultura`),
+  ADD KEY `FOREIGN` (`UtilizadorEmail`) USING BTREE;
+
+--
+-- Indexes for table `logs`
+--
+ALTER TABLE `logs`
+  ADD PRIMARY KEY (`LogID`);
+
+--
+-- Indexes for table `medicoes`
+--
+ALTER TABLE `medicoes`
+  ADD PRIMARY KEY (`IDVariavel`,`IDCultura`,`NumeroMedicao`),
+  ADD KEY `FOREIGN` (`IDCultura`,`IDVariavel`) USING BTREE;
+
+--
+-- Indexes for table `medicoesluminosidade`
+--
+ALTER TABLE `medicoesluminosidade`
+  ADD PRIMARY KEY (`IDMedicao`);
+
+--
+-- Indexes for table `medicoestemperatura`
+--
+ALTER TABLE `medicoestemperatura`
+  ADD PRIMARY KEY (`IDMedicao`);
+
+--
+-- Indexes for table `sistema`
+--
+ALTER TABLE `sistema`
+  ADD PRIMARY KEY (`Sistema_ID`);
+
+--
+-- Indexes for table `utilizador`
+--
+ALTER TABLE `utilizador`
+  ADD PRIMARY KEY (`Email`);
+
+--
+-- Indexes for table `variaveis`
+--
+ALTER TABLE `variaveis`
+  ADD PRIMARY KEY (`IDVariavel`);
+
+--
+-- Indexes for table `variaveismedidas`
+--
+ALTER TABLE `variaveismedidas`
+  ADD PRIMARY KEY (`IDVariavel`,`IDCultura`),
+  ADD KEY `FOREIGN` (`IDCultura`,`IDVariavel`) USING BTREE;
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `alertas`
+--
+ALTER TABLE `alertas`
+  MODIFY `IDAlerta` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `logs`
+--
+ALTER TABLE `logs`
+  MODIFY `LogID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `medicoesluminosidade`
+--
+ALTER TABLE `medicoesluminosidade`
+  MODIFY `IDMedicao` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `medicoestemperatura`
+--
+ALTER TABLE `medicoestemperatura`
+  MODIFY `IDMedicao` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Limitadores para a tabela `cultura`
+--
+ALTER TABLE `cultura`
+  ADD CONSTRAINT `FK_UtilizadorEmail` FOREIGN KEY (`UtilizadorEmail`) REFERENCES `utilizador` (`Email`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Limitadores para a tabela `medicoes`
+--
+ALTER TABLE `medicoes`
+  ADD CONSTRAINT `FK_Cultura` FOREIGN KEY (`IDCultura`) REFERENCES `variaveismedidas` (`IDCultura`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_Variavel` FOREIGN KEY (`IDVariavel`) REFERENCES `variaveismedidas` (`IDVariavel`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Limitadores para a tabela `variaveismedidas`
+--
+ALTER TABLE `variaveismedidas`
+  ADD CONSTRAINT `FK_IDCultura` FOREIGN KEY (`IDCultura`) REFERENCES `cultura` (`IDCultura`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_IDVariavel` FOREIGN KEY (`IDVariavel`) REFERENCES `variaveis` (`IDVariavel`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
