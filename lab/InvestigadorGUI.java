@@ -40,13 +40,35 @@ public class InvestigadorGUI {
 	private boolean ButtonUpdatePress = false;
 	private String gU [];
 	private JPanel inserir;
+
 	private JTextField idCulturaTU;
 	private JTextField nomeCulturaTU;
 	private JTextField descricaoCulturaTU;
 	private JTextField utilizadorEmailTU;
-	private JButton updateCulture = new JButton("Alterar cultura");
+	
+	private JTextField idVariavelT;
+	private JTextField numeroMedicaoT;
+	private JTextField dataHoraMedicaoT;
+	private JTextField valorMedicaoT;
+	
+	private JTextField idVariavelTU;
+	private JTextField numeroMedicaoTU;
+	private JTextField dataHoraMedicaoTU;
+	private JTextField valorMedicaoTU;
+
+	private JLabel idCultura;
+	private JLabel nomeCultura;
+	private JLabel descricaoCultura;
+	private JLabel utilizadorEmail;
+	private JLabel idVariavel;
+	private JLabel numeroMedicao;
+	private JLabel dataHoraMedicao;
+	private JLabel valorMedicao;
+	
+	private JButton updateCulture;
 	private String utiName;
 	private boolean backButtonPress = false;
+	private char c;
 
 	public InvestigadorGUI(LoginGUI log, String utiName) {
 		this.log = log;
@@ -56,11 +78,18 @@ public class InvestigadorGUI {
 		frame.setVisible(true);	
 	}
 
+
+
 	public void addFrameContent() {
 		idCulturaT = new JTextField();
 		nomeCulturaT = new JTextField();
 		descricaoCulturaT = new JTextField();
 		utilizadorEmailT = new JTextField();
+		idVariavelT = new JTextField ();
+		numeroMedicaoT = new JTextField();
+		dataHoraMedicaoT = new JTextField();
+		valorMedicaoT = new JTextField(); 
+
 		modelU = new DefaultListModel<String>();
 		listU = new JList<String>(modelU);
 		scrollU = new JScrollPane(listU);	
@@ -78,31 +107,36 @@ public class InvestigadorGUI {
 
 	public void addButtonsContent() {
 		InvestigadorGUI gui = this;
-		
+
 		center = new JLabel();
 		center.setLayout(new GridLayout(2,1,60,60));
 		center.setBorder(BorderFactory.createEmptyBorder(75, 75, 75, 75));
 		JButton cultureButton = new JButton("Manutenção de culturas");
 		cultureButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-					backButton();
-				//new BotaoCultura(gui);
+				c = 'C';
+				updateCulture = new JButton("Alterar cultura");
+				backButton();
+			//	new BotaoManutencaoCM(gui, c);
 			}
 		});
 		JButton measuresButton = new JButton("Manutenção de medições");
 		measuresButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				c = 'M';
+				updateCulture = new JButton("Alterar medição");
 				//if (!backButtonPress) {
-					backButton();
+				backButton();
 				//}
-				//new BotaoMedicoes();	
+				//new BotaoMedicoes();
+				//new BotaoManutencaoCM(gui, c);
 			}
 		});	
 		center.add(cultureButton);
 		center.add(measuresButton);
 		frame.add(center, BorderLayout.CENTER);
 	}
-	
+
 	public void backButton(){
 		JButton voltar = new JButton("Voltar");
 		voltar.addActionListener(new ActionListener() {
@@ -120,7 +154,7 @@ public class InvestigadorGUI {
 		voltarJ.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		voltarJ.add(voltar, BorderLayout.EAST);
 		frame.add(voltarJ,  BorderLayout.SOUTH);
-		
+
 		frame.add(voltarJ,  BorderLayout.SOUTH);
 		SwingUtilities.updateComponentTreeUI(frame);
 		backButtonPress = true;
@@ -131,33 +165,65 @@ public class InvestigadorGUI {
 			JButton ok_inserir = new JButton("Ok");
 			ok_inserir.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if (!idCulturaT.getText().isEmpty() && !nomeCulturaT.getText().isEmpty() && !descricaoCulturaT.getText().isEmpty() && !utilizadorEmailT.getText().isEmpty()) {
-						modelD.addElement(idCulturaT.getText() + "      " + nomeCulturaT.getText()+ "      " + descricaoCulturaT.getText() + "      " + utilizadorEmailT.getText());
-						modelU.addElement(idCulturaT.getText() + "      " + nomeCulturaT.getText()+ "      " + descricaoCulturaT.getText() + "      " + utilizadorEmailT.getText()); 
-						SwingUtilities.updateComponentTreeUI(frame);
-						String query = "INSERT INTO cultura (IDCultura, NomeCultura, DescricaoCultura, UtilizadorEmail)"
-								+ "VALUES ("+idCulturaT.getText()+",'"+nomeCulturaT.getText()+"','"+descricaoCulturaT.getText()+"','"+utilizadorEmailT.getText()+"')";
-						try {
-							PreparedStatement preparedStmt = log.getConn().prepareStatement(query);
-							preparedStmt.execute();
-						} catch (SQLException e1) {
-							e1.printStackTrace();
-						}					
-						idCulturaT.setText("");
-						nomeCulturaT.setText("");
-						descricaoCulturaT.setText("");
-						utilizadorEmailT.setText("");	
+					if(c == 'C') {
+						if (!idCulturaT.getText().isEmpty() && !nomeCulturaT.getText().isEmpty() && !descricaoCulturaT.getText().isEmpty() && !utilizadorEmailT.getText().isEmpty()) {
+							modelD.addElement(idCulturaT.getText() + "      " + nomeCulturaT.getText()+ "      " + descricaoCulturaT.getText() + "      " + utilizadorEmailT.getText());
+							modelU.addElement(idCulturaT.getText() + "      " + nomeCulturaT.getText()+ "      " + descricaoCulturaT.getText() + "      " + utilizadorEmailT.getText()); 
+							SwingUtilities.updateComponentTreeUI(frame);
+							String query = "INSERT INTO cultura (IDCultura, NomeCultura, DescricaoCultura, UtilizadorEmail)"
+									+ "VALUES ("+idCulturaT.getText()+",'"+nomeCulturaT.getText()+"','"+descricaoCulturaT.getText()+"','"+utilizadorEmailT.getText()+"')";
+							try {
+								PreparedStatement preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.execute();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}					
+							idCulturaT.setText("");
+							nomeCulturaT.setText("");
+							descricaoCulturaT.setText("");
+							utilizadorEmailT.setText("");	
+						}
+					} else {
+						if (!idVariavelT.getText().isEmpty() && !idCulturaT.getText().isEmpty() && !numeroMedicaoT.getText().isEmpty() && !dataHoraMedicaoT.getText().isEmpty() && !valorMedicaoT.getText().isEmpty()) {
+							modelD.addElement(idVariavelT.getText() + "      " + idCulturaT.getText()+ "      " + numeroMedicaoT.getText() + "      " + dataHoraMedicaoT.getText() + "      " + valorMedicaoT.getText());
+							modelU.addElement(idVariavelT.getText() + "      " + idCulturaT.getText()+ "      " + numeroMedicaoT.getText() + "      " + dataHoraMedicaoT.getText() + "      " + valorMedicaoT.getText()); 
+							SwingUtilities.updateComponentTreeUI(frame);
+							String query = "INSERT INTO medicoes (IDVariavel, IDCultura, NumeroMedicao, DataHoraMedicao, ValorMedicao)"
+									+ "VALUES ("+idVariavelT.getText()+",'"+idCulturaT.getText()+"','"+numeroMedicaoT.getText()+"','"+dataHoraMedicaoT.getText()+"','"+valorMedicaoT.getText()+"')";
+							try {
+								PreparedStatement preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.execute();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
+							idVariavelT.setText("");
+							idCulturaT.setText("");
+							numeroMedicaoT.setText("");
+							dataHoraMedicaoT.setText("");	
+							valorMedicaoT.setText("");	
+						}		
 					}
 
 					if ( !listD.isSelectionEmpty() ) {					
 						String g [] = listD.getSelectedValue().split("      ");
-						String query = "DELETE FROM cultura WHERE NomeCultura = '" + g[1] + "';";
-						PreparedStatement preparedStmt;
-						try {
-							preparedStmt = log.getConn().prepareStatement(query);
-							preparedStmt.executeUpdate();
-						} catch (SQLException e1) {
-							e1.printStackTrace();
+						if(c == 'C') {
+							String query = "DELETE FROM cultura WHERE NomeCultura = '" + g[1] + "';";
+							PreparedStatement preparedStmt;
+							try {
+								preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.executeUpdate();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
+						} else {
+							String query = "DELETE FROM medicoes WHERE IDCultura = '" + g[0] + "' AND IDVariavel = '" + g[1] + "';";
+							PreparedStatement preparedStmt;
+							try {
+								preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.executeUpdate();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
 						}
 						if (isPress) {
 							modelU.remove(listD.getSelectedIndex());
@@ -167,13 +233,24 @@ public class InvestigadorGUI {
 					}
 
 					if(ButtonUpdatePress){
-						String query = "UPDATE cultura SET IDCultura = '"+ idCulturaTU.getText() +"', NomeCultura='"+ nomeCulturaTU.getText() +"', DescricaoCultura = '"+ descricaoCulturaTU.getText() +"', UtilizadorEmail = '" + utilizadorEmailTU.getText() +"' WHERE IDCultura = '"+gU[0]+"' AND NomeCultura = '"+gU[1]+"' AND DescricaoCultura='"+gU[2]+"' AND UtilizadorEmail='"+gU[3]+"'";
-						PreparedStatement preparedStmt;
-						try {
-							preparedStmt = log.getConn().prepareStatement(query);
-							preparedStmt.executeUpdate();
-						} catch (SQLException e1) {
-							e1.printStackTrace();
+						if(c == 'C') {
+							String query = "UPDATE cultura SET IDCultura = '"+ idCulturaTU.getText() +"', NomeCultura='"+ nomeCulturaTU.getText() +"', DescricaoCultura = '"+ descricaoCulturaTU.getText() +"', UtilizadorEmail = '" + utilizadorEmailTU.getText() +"' WHERE IDCultura = '"+gU[0]+"' AND NomeCultura = '"+gU[1]+"' AND DescricaoCultura='"+gU[2]+"' AND UtilizadorEmail='"+gU[3]+"'";
+							PreparedStatement preparedStmt;
+							try {
+								preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.executeUpdate();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
+						} else {
+							String query = "UPDATE medicoes SET IDVariavel = '"+ idVariavelTU.getText() +"', IDCultura='"+ idCulturaTU.getText() +"', NumeroMedicao = '"+ numeroMedicaoTU.getText() +"', DataHoraMedicao = '" + dataHoraMedicaoTU.getText() +"', ValorMedicao = '" + valorMedicaoTU.getText() + "' WHERE IDVariavel = '"+gU[0]+"' AND IDCultura = '"+gU[1]+"' AND NumeroMedicao='"+gU[2]+"' AND DataHoraMedicao='"+gU[3]+"' AND ValorMedicao='"+gU[4]+"'";
+							PreparedStatement preparedStmt;
+							try {
+								preparedStmt = log.getConn().prepareStatement(query);
+								preparedStmt.executeUpdate();
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
 						}
 						frame.remove(inserir);
 						updateCulture.doClick();
@@ -182,54 +259,107 @@ public class InvestigadorGUI {
 					}
 
 					if ( !listU.isSelectionEmpty() ) {
+
+						
 						System.out.println(listU.getSelectedValue());
 						frame.remove(scrollPU);
 						frame.remove(listU);
 						gU = listU.getSelectedValue().split("      ");
 						inserir = new JPanel();
-						inserir.setLayout(new GridLayout(4,2));				
+						if(c == 'C') {
+							inserir.setLayout(new GridLayout(4,2));				
+							//						inserir.setPreferredSize(new Dimension (300,20));
+							//						inserir.setBorder(BorderFactory.createEmptyBorder(0, 400, 0, 400));
+
+							idCultura = new JLabel("IDCultura");
+							nomeCultura = new JLabel("NomeCultura");
+							descricaoCultura = new JLabel("DescriçãoCultura");
+							utilizadorEmail = new JLabel("UtilizadorEmail");
+						} else {
+
+							inserir.setLayout(new GridLayout(5,2));				
+
+							idVariavel = new JLabel("IDCultura");
+							idCultura = new JLabel("IDCultura");
+							numeroMedicao = new JLabel("NumeroMedição");
+							dataHoraMedicao = new JLabel("DataHoraMedição");
+							valorMedicao = new JLabel("ValorMedição");
+						}
 						inserir.setPreferredSize(new Dimension (300,20));
 						inserir.setBorder(BorderFactory.createEmptyBorder(0, 400, 0, 400));
-
-						JLabel idCultura = new JLabel("IDCultura");
-						JLabel nomeCultura = new JLabel("NomeCultura");
-						JLabel descricaoCultura = new JLabel("DescriçãoCultura");
-						JLabel utilizadorEmail = new JLabel("UtilizadorEmail");
 
 						JPanel p1 = new JPanel();
 						JPanel p2 = new JPanel();
 						JPanel p3 = new JPanel();
 						JPanel p4 = new JPanel();
+						JPanel p5 = new JPanel();
 
-						idCulturaTU = new JTextField(gU[0]);
-						idCulturaTU.setPreferredSize(new Dimension (130,20));
-						p1.add(idCulturaTU);
-						p1.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
+						if(c == 'C') {
+							idCulturaTU = new JTextField(gU[0]);
+							idCulturaTU.setPreferredSize(new Dimension (130,20));
+							p1.add(idCulturaTU);
+							p1.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
 
-						nomeCulturaTU = new JTextField(gU[1]);
-						nomeCulturaTU.setPreferredSize(new Dimension (130,20));
-						p2.add(nomeCulturaTU);
-						p2.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
+							nomeCulturaTU = new JTextField(gU[1]);
+							nomeCulturaTU.setPreferredSize(new Dimension (130,20));
+							p2.add(nomeCulturaTU);
+							p2.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
 
-						descricaoCulturaTU = new JTextField(gU[2]);
-						descricaoCulturaTU.setPreferredSize(new Dimension (130,20));
-						p3.add(descricaoCulturaTU);
-						p3.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
+							descricaoCulturaTU = new JTextField(gU[2]);
+							descricaoCulturaTU.setPreferredSize(new Dimension (130,20));
+							p3.add(descricaoCulturaTU);
+							p3.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
 
-						utilizadorEmailTU = new JTextField(gU[3]);
-						utilizadorEmailTU.setPreferredSize(new Dimension (130,20));
-						p4.add(utilizadorEmailTU);
-						p4.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
+							utilizadorEmailTU = new JTextField(gU[3]);
+							utilizadorEmailTU.setPreferredSize(new Dimension (130,20));
+							p4.add(utilizadorEmailTU);
+							p4.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
 
-						inserir.add(idCultura);
-						inserir.add(p1);
-						inserir.add(nomeCultura);
-						inserir.add(p2);
-						inserir.add(descricaoCultura);
-						inserir.add(p3);
-						inserir.add(utilizadorEmail);
-						inserir.add(p4);
+							inserir.add(idCultura);
+							inserir.add(p1);
+							inserir.add(nomeCultura);
+							inserir.add(p2);
+							inserir.add(descricaoCultura);
+							inserir.add(p3);
+							inserir.add(utilizadorEmail);
+							inserir.add(p4);
+						} else {
+							idVariavelTU = new JTextField(gU[0]);
+							idVariavelTU.setPreferredSize(new Dimension (130,20));
+							p1.add(idVariavelTU);
+							p1.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+							
+							idCulturaTU = new JTextField(gU[1]);
+							idCulturaTU.setPreferredSize(new Dimension (130,20));
+							p2.add(idCulturaTU);
+							p2.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
 
+							numeroMedicaoTU = new JTextField(gU[2]);
+							numeroMedicaoTU.setPreferredSize(new Dimension (130,20));
+							p3.add(numeroMedicaoTU);
+							p3.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+
+							dataHoraMedicaoTU = new JTextField(gU[3]);
+							dataHoraMedicaoTU.setPreferredSize(new Dimension (130,20));
+							p4.add(dataHoraMedicaoTU);
+							p4.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+
+							valorMedicaoTU = new JTextField(gU[4]);
+							valorMedicaoTU.setPreferredSize(new Dimension (130,20));
+							p5.add(valorMedicaoTU);
+							p5.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+
+							inserir.add(idVariavel);
+							inserir.add(p1);
+							inserir.add(idCultura);
+							inserir.add(p2);
+							inserir.add(numeroMedicao);
+							inserir.add(p3);
+							inserir.add(dataHoraMedicao);
+							inserir.add(p4);
+							inserir.add(valorMedicao);
+							inserir.add(p5);
+						}
 						frame.add(inserir, BorderLayout.CENTER);
 						SwingUtilities.updateComponentTreeUI(frame);
 						modelU.removeAllElements();
@@ -245,7 +375,7 @@ public class InvestigadorGUI {
 			okActivate = true;
 		}	
 	}
-	
+
 	public JFrame getFrame() {
 		return frame;
 	}
@@ -296,6 +426,21 @@ public class InvestigadorGUI {
 	}
 	public void setPress(boolean isPress) {
 		this.isPress = isPress;
+	}
+	public JTextField getIdVariavelT() {
+		return idVariavelT;
+	}
+	public JTextField getNumeroMedicaoT() {
+		return numeroMedicaoT;
+	}
+	public JTextField getDataHoraMedicaoT() {
+		return dataHoraMedicaoT;
+	}
+	public JTextField getValorMedicaoT() {
+		return valorMedicaoT;
+	}
+	public String getUtiName() {
+		return utiName;
 	}
 
 }
