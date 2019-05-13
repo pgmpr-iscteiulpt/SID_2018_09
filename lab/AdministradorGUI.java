@@ -358,4 +358,66 @@ public class AdministradorGUI {
 		}	
 	}
 	
+	public JFrame getFrame() {
+		return frame;
+	}
+	public JTextField getIdVariavelT() {
+		return idVariavelT;
+	}
+	public JTextField getNomeVariavelT() {
+		return nomeVariavelT;
+	}
+	public JButton getUpdateVariable() {
+		return updateVariable;
+	}
+	public JScrollPane getScrollU() {
+		return scrollU;
+	}
+	public JPanel getScrollPU() {
+		return scrollPU;
+	}
+	public JList<String> getListU() {
+		return listU;
+	}
+	public DefaultListModel<String> getModelU() {
+		return modelU;
+	}
+	public DefaultListModel<String> getModelD() {
+		return modelD;
+	}
+	public JScrollPane getScrollD() {
+		return scrollD;
+	}
+	public LoginGUI getLog() {
+		return log;
+	}
+	public JList<String> getListD() {
+		return listD;
+	}
+	public JPanel getVoltarJ() {
+		return voltarJ;
+	}
+	public boolean getIsPress() {
+		return isPress;
+	}
+	public void setPress(boolean isPress) {
+		this.isPress = isPress;
+	}
+	public JTextField getEmailT() {
+		return emailT;
+	}
+	public JTextField getNomeUtilizadorT() {
+		return nomeUtilizadorT;
+	}
+	public JTextField getCategoriaProfissionalT() {
+		return categoriaProfissionalT;
+	}
+	public JTextField getTipoUtilizadorT() {
+		return tipoUtilizadorT;
+	}
+	public String getUtiName() {
+		return utiName;
+	}
+
+
 }
