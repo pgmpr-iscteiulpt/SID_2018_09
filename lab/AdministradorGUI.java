@@ -67,7 +67,6 @@ public class AdministradorGUI {
 	private JLabel nomeUtilizador;
 	private JLabel categoriaProfissional;
 	private JLabel tipoUtilizador;
-
 	public AdministradorGUI(LoginGUI log, String utiName) {
 		this.log = log;
 		this.utiName = utiName;
@@ -76,10 +75,6 @@ public class AdministradorGUI {
 		frame.setVisible(true);
 	}
 
-	private void addButtonsContent() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	public void addFrameContent() {
 		idVariavelT = new JTextField();
@@ -104,6 +99,47 @@ public class AdministradorGUI {
 
 	}
 
+	public void addButtonsContent() {
+		AdministradorGUI gui = this;
+
+		center = new JLabel();
+		center.setLayout(new GridLayout(2,1,60,60));
+		center.setBorder(BorderFactory.createEmptyBorder(75, 75, 75, 75));
+
+		JButton variableButton = new JButton("Manutenção de variáveis");
+		variableButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				c = 'V';
+				updateVariable = new JButton("Alterar variável");
+				backButton();
+				//new BotaoManutencaoVU(gui, c);
+			}
+
+			private void backButton() {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		JButton userButton = new JButton("Manutenção de utilizadores");
+		userButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				c = 'U';
+				updateVariable = new JButton("Alterar utilizador");
+				backButton();
+				//new BotaoManutencaoVU(gui, c);	
+			}
+
+			private void backButton() {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+
+		center.add(variableButton);
+		center.add(userButton);
+
+		frame.add(center, BorderLayout.CENTER);
+	}
 
 
 }
