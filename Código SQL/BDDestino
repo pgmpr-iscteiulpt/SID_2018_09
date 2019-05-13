@@ -1,0 +1,72 @@
+-- phpMyAdmin SQL Dump
+-- version 4.8.3
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: 13-Maio-2019 às 17:48
+-- Versão do servidor: 10.1.37-MariaDB
+-- versão do PHP: 7.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `bddestino_php`
+--
+CREATE DATABASE IF NOT EXISTS `bddestino_php` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `bddestino_php`;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `logs`
+--
+
+CREATE TABLE `logs` (
+  `LogID` int(11) NOT NULL,
+  `User` varchar(50) NOT NULL,
+  `Operacao` enum('I','U','D','R') NOT NULL,
+  `DataHora` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `Tabela` varchar(50) NOT NULL,
+  `Campo` varchar(50) NOT NULL,
+  `Atualizacao` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `sistema`
+--
+
+CREATE TABLE `sistema` (
+  `DataHoraAtualizacao` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `logs`
+--
+ALTER TABLE `logs`
+  ADD PRIMARY KEY (`LogID`);
+
+--
+-- Indexes for table `sistema`
+--
+ALTER TABLE `sistema`
+  ADD PRIMARY KEY (`DataHoraAtualizacao`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
