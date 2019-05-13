@@ -1,0 +1,5 @@
+(IMPORTANTE: Nao alterar estrutura do ficheiro)
+Intervalo de escrita no Mongo (segundos):
+2
+Intervalo de escrita no MySQL (segundos):
+3
