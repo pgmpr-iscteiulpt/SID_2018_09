@@ -112,7 +112,7 @@ public class AdministradorGUI {
 				c = 'V';
 				updateVariable = new JButton("Alterar variável");
 				backButton();
-//				new BotaoManutencaoVU(gui, c);
+				new BotaoManutencaoVU(gui, c);
 			}
 		});
 		JButton userButton = new JButton("Manutenção de utilizadores");
@@ -121,7 +121,7 @@ public class AdministradorGUI {
 				c = 'U';
 				updateVariable = new JButton("Alterar utilizador");
 				backButton();
-//				new BotaoManutencaoVU(gui, c);	
+				new BotaoManutencaoVU(gui, c);	
 			}
 		});
 
