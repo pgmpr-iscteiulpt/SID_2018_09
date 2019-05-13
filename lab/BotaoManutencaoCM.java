@@ -65,10 +65,112 @@ public class BotaoManutencaoCM {
 		
 	}
 
-	private void insertButton() {
-		// TODO Auto-generated method stub
-		
+	public void insertButton() {
+		if (c == 'C') {
+			insertCulture = new JButton("Inserir cultura");
+		} else {
+			insertCulture = new JButton("Inserir medição");	
+		}
+		insertCulture.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				JPanel inserir = new JPanel();
+				if (c == 'C') {
+					inserir.setLayout(new GridLayout(4,2));	
+
+					idCultura = new JLabel("IDCultura");
+					nomeCultura = new JLabel("NomeCultura");
+					descricaoCultura = new JLabel("DescriçãoCultura");
+					utilizadorEmail = new JLabel("UtilizadorEmail");
+				} else {
+					inserir.setLayout(new GridLayout(5,2));
+
+					idVariavel = new JLabel("IDVariável");
+					idCultura = new JLabel("IDCultura");
+					numeroMedicao = new JLabel("NumeroMedicão");
+					dataHoraMedicao = new JLabel("DataHoraMedicão");
+					valorMedicao = new JLabel("ValorMedicão");
+
+				}
+
+				inserir.setPreferredSize(new Dimension (300,20));
+				inserir.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 0));
+
+				JPanel p1 = new JPanel();
+				JPanel p2 = new JPanel();
+				JPanel p3 = new JPanel();
+				JPanel p4 = new JPanel();
+				JPanel p5 = new JPanel();
+
+				if (c == 'C') {
+					System.out.println(gui);
+					System.out.println(gui.getIdCulturaT());
+					//inserir.setLayout(new GridLayout(4,2));
+					gui.getIdCulturaT().setPreferredSize(new Dimension (130,20));
+					p1.add(gui.getIdCulturaT());
+					p1.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
+
+					gui.getNomeCulturaT().setPreferredSize(new Dimension (130,20));
+					p2.add(gui.getNomeCulturaT());
+					p2.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
+
+					gui.getDescricaoCulturaT().setPreferredSize(new Dimension (130,20));
+					p3.add(gui.getDescricaoCulturaT());
+					p3.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
+
+					gui.getUtilizadorEmailT().setPreferredSize(new Dimension (130,20));
+					p4.add(gui.getUtilizadorEmailT());
+					p4.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
+
+					inserir.add(idCultura);
+					inserir.add(p1);
+					inserir.add(nomeCultura);
+					inserir.add(p2);
+					inserir.add(descricaoCultura);
+					inserir.add(p3);
+					inserir.add(utilizadorEmail);
+					inserir.add(p4);
+
+				} else {
+					gui.getIdVariavelT().setPreferredSize(new Dimension (130,20));
+					p1.add(gui.getIdVariavelT());
+					p1.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+
+					gui.getIdCulturaT().setPreferredSize(new Dimension (130,20));
+					p2.add(gui.getIdCulturaT());
+					p2.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+
+					gui.getNumeroMedicaoT().setPreferredSize(new Dimension (130,20));
+					p3.add(gui.getNumeroMedicaoT());
+					p3.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+
+					gui.getDataHoraMedicaoT().setPreferredSize(new Dimension (130,20));
+					p4.add(gui.getDataHoraMedicaoT());
+					p4.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+
+					gui.getValorMedicaoT().setPreferredSize(new Dimension (130,20));
+					p5.add(gui.getValorMedicaoT());
+					p5.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+
+					inserir.add(idVariavel);
+					inserir.add(p1);
+					inserir.add(idCultura);
+					inserir.add(p2);
+					inserir.add(numeroMedicao);
+					inserir.add(p3);
+					inserir.add(dataHoraMedicao);
+					inserir.add(p4);
+					inserir.add(valorMedicao);
+					inserir.add(p5);
+				}
+				gui.getFrame().add(inserir, BorderLayout.WEST);
+
+				gui.itsOkActivated();
+				SwingUtilities.updateComponentTreeUI(gui.getFrame());
+
+			}
+		});
 	}
 
-	
+
 }
