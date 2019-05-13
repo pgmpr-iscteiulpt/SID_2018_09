@@ -81,9 +81,27 @@ public class AdministradorGUI {
 		
 	}
 
-	private void addFrameContent() {
-		// TODO Auto-generated method stub
-		
+	public void addFrameContent() {
+		idVariavelT = new JTextField();
+		nomeVariavelT = new JTextField();
+		emailT = new JTextField();
+		nomeUtilizadorT = new JTextField();
+		categoriaProfissionalT = new JTextField();
+		tipoUtilizadorT = new JTextField();
+		modelU = new DefaultListModel<String>();
+		listU = new JList<String>(modelU);
+		scrollU = new JScrollPane(listU);	
+		modelD = new DefaultListModel<String>();
+		listD = new JList<String>(modelD);
+		scrollD = new JScrollPane(listD);
+		frame = new JFrame("Laboratório do Administrador: " + utiName);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setPreferredSize(new Dimension (1100,600));
+		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setLocation(dimension.width/2 - 1250/2, dimension.height/2 - 750/2);
+		frame.setLayout(new BorderLayout());
+		frame.pack();
+
 	}
 
 
