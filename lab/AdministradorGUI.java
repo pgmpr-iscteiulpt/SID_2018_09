@@ -67,6 +67,7 @@ public class AdministradorGUI {
 	private JLabel nomeUtilizador;
 	private JLabel categoriaProfissional;
 	private JLabel tipoUtilizador;
+
 	public AdministradorGUI(LoginGUI log, String utiName) {
 		this.log = log;
 		this.utiName = utiName;
@@ -74,7 +75,6 @@ public class AdministradorGUI {
 		addButtonsContent();
 		frame.setVisible(true);
 	}
-
 
 	public void addFrameContent() {
 		idVariavelT = new JTextField();
@@ -112,12 +112,7 @@ public class AdministradorGUI {
 				c = 'V';
 				updateVariable = new JButton("Alterar variável");
 				backButton();
-				//new BotaoManutencaoVU(gui, c);
-			}
-
-			private void backButton() {
-				// TODO Auto-generated method stub
-				
+//				new BotaoManutencaoVU(gui, c);
 			}
 		});
 		JButton userButton = new JButton("Manutenção de utilizadores");
@@ -126,12 +121,7 @@ public class AdministradorGUI {
 				c = 'U';
 				updateVariable = new JButton("Alterar utilizador");
 				backButton();
-				//new BotaoManutencaoVU(gui, c);	
-			}
-
-			private void backButton() {
-				// TODO Auto-generated method stub
-				
+//				new BotaoManutencaoVU(gui, c);	
 			}
 		});
 
@@ -141,5 +131,30 @@ public class AdministradorGUI {
 		frame.add(center, BorderLayout.CENTER);
 	}
 
+
+	public void backButton(){
+		JButton voltar = new JButton("Voltar");
+		voltar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.getContentPane().removeAll();
+				addButtonsContent();
+				okActivate = false;
+				SwingUtilities.updateComponentTreeUI(frame);
+			}
+		});
+
+		frame.getContentPane().removeAll();
+		voltarJ = new JPanel();
+		voltarJ.setLayout(new BorderLayout());
+		voltarJ.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		voltarJ.add(voltar, BorderLayout.EAST);
+		frame.add(voltarJ,  BorderLayout.SOUTH);
+
+		frame.add(voltarJ,  BorderLayout.SOUTH);
+		SwingUtilities.updateComponentTreeUI(frame);
+		backButtonPress = true;
+	}
+
+	
 
 }
